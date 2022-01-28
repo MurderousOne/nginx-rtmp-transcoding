@@ -1,1 +1,1 @@
-# nginx-transcoding
+# nginx-rtmp-transcoding
