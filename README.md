@@ -25,5 +25,5 @@
 <p>-tune: I played around a few of this settings, and had the best experience with film you might need to play around this setting, but film is a safe choice.</p>
 <p>-pix_fmt: This is the picture format, yuv420p seems to be the most supported/popular one.</p>
 <p>-c:a: The audio codec is set as copy so it won’t re-encode the stream’s audio.</p>
-<p>-threads: The number of CPU cores/threads you want to use. I have 8 on my server.
-The output needs to be your liveout application with the right STREAM_KEY.</p>
+<p>-threads: The number of CPU cores/threads you want to use. I have 8 on my server.</p>
+<p>The output needs to be your liveout application with the right STREAM_KEY.</p>
