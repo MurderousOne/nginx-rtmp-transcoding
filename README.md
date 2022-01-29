@@ -11,7 +11,7 @@
 <p>record_suffix: I set it like that so I can easily identify the files using the hour of the day.</p>
 <p>record_interval: This is set to 15 minutes, it will restart recording each times this interval is reached.</p>
 <p>You may want to play with the Access settings (Allow/Deny) to only allow your local network to have access to your “In” stream. </p> 
-<p>You can read more in the nginx-rtmp wiki <a href="https://github.com/dreamsxin/nginx-rtmp-wiki/blob/master/Directives.md#access" target="_blank">Here.</a> </p>
+<p>You can read more in the nginx-rtmp wiki <a href="https://github.com/dreamsxin/nginx-rtmp-wiki/blob/master/Directives.md#access" target="_blank" rel="noopener noreferrer">Here.</a> </p>
 
 
 <h2>FFmpeg settings explained</h2>
