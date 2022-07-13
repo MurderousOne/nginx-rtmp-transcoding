@@ -1,4 +1,4 @@
-# nginx-rtmp-transcoding
+# nginx-ffmpeg-rtmp-transcoding
 
 <p>WILL TRANSCODE A LIVESTREAM FROM ANY SOURCE TO 720P FOR LOWEND MOBILE PLAYBACK ON TWITCH</p>
 
