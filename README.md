@@ -1,91 +1,29 @@
-#########################################################################
-### NGNIX CONF FOR DOCKER RTMP FFMPEG STREAMING SERVER ##################
-#########################################################################
-### CUSTOM NGINX CONFIG USED IN DOCKER CONTAINER FOR FFMPEG STREAMING ###
-#########################################################################
+# nginx-ffmpeg-rtmp-transcoding
 
-worker_processes auto;
+<p>WILL TRANSCODE A LIVESTREAM FROM ANY SOURCE TO 720P FOR LOWEND MOBILE PLAYBACK ON TWITCH</p>
 
-events {
-    worker_connections  1024;
-}
+<h2>General rtmp settings explained</h2>
+<h3>All possible directives explained</h3>
 
-http {
-    include       mime.types;
-    default_type  application/octet-stream;
-
-    sendfile        on;
-    keepalive_timeout  65;
-
-    server {
-        listen       80;
-        server_name  localhost;
-
-        location / {
-            root   html;
-            index  index.html index.html;
-        }
-
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   html;
-        }
-    }
-}
-#    ____ _____ __  __ ____    __  __ _____ ____ ___    _      ____ _____ ____  _____    _    __  __ ___ _   _  ____   ____  _____ ______     _______ ____
-#   |  _ \_   _|  \/  |  _ \  |  \/  | ____|  _ \_ _|  / \    / ___|_   _|  _ \| ____|  / \  |  \/  |_ _| \ | |/ ___| / ___|| ____|  _ \ \   / / ____|  _ \
-#   | |_) || | | |\/| | |_) | | |\/| |  _| | | | | |  / _ \   \___ \ | | | |_) |  _|   / _ \ | |\/| || ||  \| | |  _  \___ \|  _| | |_) \ \ / /|  _| | |_) |
-#   |  _ < | | | |  | |  __/  | |  | | |___| |_| | | / ___ \   ___) || | |  _ <| |___ / ___ \| |  | || || |\  | |_| |  ___) | |___|  _ < \ V / | |___|  _ <
-#   |_| \_\|_| |_|  |_|_|     |_|  |_|_____|____/___/_/   \_\ |____/ |_| |_| \_\_____/_/   \_\_|  |_|___|_| \_|\____| |____/|_____|_| \_\ \_/  |_____|_| \_\
-#
-rtmp_auto_push on;
-rtmp {
-    server {
-        listen 1935;
-        ping 30s;
-        notify_method get;
-
-        application live {
-            live on;
-
-	#PUSH TO PLATFORMS USING FFMPEG x265
+<p>record_path: Set this to the path at which you want to record everything.</p>
+<p>recorder: This is a recorder set</p>
+<p>record: This is set to all so we get both audio and video into the files.</p>
+<p>record_suffix: I set it like that so I can easily identify the files using the hour of the day.</p>
+<p>record_interval: This is set to 15 minutes, it will restart recording each times this interval is reached.</p>
+<p>You may want to play with the Access settings (Allow/Deny) to only allow your local network to have access to your “In” stream. </p> 
+<p>You can read more in the nginx-rtmp wiki <a href="https://github.com/dreamsxin/nginx-rtmp-wiki/blob/master/Directives.md#access" target="_blank" rel="noopener noreferrer">Here.</a> </p>
 
 
-#FFMPEG TO TRANSCODE / CONVERT TO 720p
-
-exec ffmpeg -threads 12 -re -i "rtmp://127.0.0.1/live/YOUROBSSTREAMKEY" -c:v libx264 -pix_fmt nv12 -x264-params "nal-hrd=cbr" -vf scale=1280:720 -vb 6000k -minrate 6000k -maxrate 6000k -bufsize 6000k -preset veryfast -q 0 -g 60 -keyint_min 60 -x264opts "keyint=120:min-keyint=120:no-scenecut" -c:a aac -b:a 128k -c:v:a copy -f flv "rtmp://127.0.0.1/liveout/YOUROBSSTREAMKEY";
-
-#SEND STREAM DIRECT
-
-        #PUSH TO RESTREAM.IO
-        push rtmp://live.restream.io/live/YOURSTREAMKEY;
-
-	}
-
-	# TRANSCODED 720P Stream #		
-
-	application liveout {
-        live on;
-
-	#PUSH STREAM TO STUNNEL FOR FACEBOOK ENCRYPTION --> REQUIRES STUNNEL
-	push rtmp://YOURSTUNNELIP:STUNNELPORT/rtmp/YOURFBSTREAMKEY;
-
-	#PUSH TO TROVO
-	
-	push rtmp://livepush.trovo.live/live/YOURSTREAMKEY;
-
-	#PUSH TO TWITCH
-	push rtmp://jfk.contribute.live-video.net/app/YOURSTREAMKEY;
-	
-	#PUSH TO STEAM
-	push rtmp://ingest-rtmp.broadcast.steamcontent.com:1935/app/YOURSTREAMKEY;
-
-	#PUSH TO KICK --> REQUIRED STUNNEL
-	push rtmp://YOURSTUNNELIP:STUNNELPORT/rtmp/YOURSTREAMKEY;
-
-	#PUSH TO INSTAGRAM
-    push rtmp://YOURSTUNNELIP:STUNNELPORT/rtmp/YOURSTREAMKEY;
-            
-		}
-	}
-}
+<h2>FFmpeg settings explained</h2>
+<p>-i: This is the input (Your stream, using the right STREAM_KEY)</p>
+<p>-vb, -minrate, -maxrate, -bufsize: I found out that my stream was a lot more stable when all of those where the same size. -vb is the video bit rate, -minrate and -maxrate needs to be the same for Twitch (Constant bit rate).</p>
+<p>-s: This is the output resolution you want. Here I transcode from 1080p to 720p.</p>
+<p>-c:v libx264: The encoder you want to use (I strongly recommend to use libx264)</p>
+<p>-preset: You can play around with this setting depending on your server. I use the faster preset and it works fine. You could try fastest (To use less CPU) or fast (To use more CPU).</p>
+<p>-r, -g, -keyint_min 60, -x264opts: -r is your FPS. -g needs to be double your FPS (To have 2 seconds key-frame interval as requested by Twitch). -keyint_min is set to the same as my FPS. The content of -x264opts is to do the same thing about the key-frame interval.</p>
+<p>-sws_flags: I use this to have a better down-scale quality.</p>
+<p>-tune: I played around a few of this settings, and had the best experience with film you might need to play around this setting, but film is a safe choice.</p>
+<p>-pix_fmt: This is the picture format, yuv420p seems to be the most supported/popular one.</p>
+<p> -c:a: The audio codec is set as copy so it won’t re-encode the stream’s audio.</p>
+<p>-threads: The number of CPU cores/threads you want to use. I have 8 on my server.</p>
+<p>The output needs to be your liveout application with the right STREAM_KEY.</p>
